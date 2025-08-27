@@ -5,7 +5,6 @@ Hi this is my first time writing a README file so i have tried to include as muc
 
 File Structure:
 📂 JANUS_Induction
- └── 📂 JANUS Induction
       └── 📂 Round 1
            ├── 📂 codes
            │    ├── vilvesh_2025b5ps0562h_arduino_code.ino
