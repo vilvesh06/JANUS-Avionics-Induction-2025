@@ -3,6 +3,7 @@ Repo containing all the necessary files to evaluate my answers and solutions to 
 
 Hi this is my first time writing a README file so i have tried to include as much info as i can without crossing the given regulations so here you go:
 
+(note that the file hierarchy is only properly visible when you view this readme file as code)
 File Structure:
 📂 JANUS_Induction
       └── 📂 Round 1
