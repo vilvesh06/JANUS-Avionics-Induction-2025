@@ -37,8 +37,8 @@ If velocity is around zero → the system is at apogee (yellow LED ON + buzzer O
 If velocity is negative → the system is descending (red LED ON).
 6. I also printed out values to the Serial monitor so I could check what was happening during the simulation.
 7. This way, the state of the system is always indicated clearly through LEDs and the buzzer at the peak.
-8. I aslo felt like deviating from the main point a little bit but didnt do so and i will list the changes i wanted to make below:
-With small noise, velocity might hover around 0, causing buzzer to ring repeatedly, so i wanted to make the change that it should require velocity to stay near zero for a few cycles before declaring apogee.
-I also wanted to add clearer axis labels and maybe polish the visuals  to make it more 'fantastic' but i didnt want to go too deep into that.
+8. I aslo felt like deviating from the main point a little bit but didnt do so and I will list the changes I wanted to make below:
+With small noise, velocity might hover around 0, causing buzzer to ring repeatedly, so I wanted to make the change that it should require velocity to stay near zero for a few cycles before declaring apogee.
+I also wanted to add clearer axis labels and maybe polish the visuals  to make it more 'fantastic' but I didn't want to go too deep into that.
 
-Anyways, that was a *short* summary of my journey
+Anyways, that was a *short* summary of my journey.
