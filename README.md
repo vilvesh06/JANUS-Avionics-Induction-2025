@@ -33,7 +33,7 @@ Problem 2 – State Detection (Arduino in Tinkercad)
 4. From the pressure, I estimated the altitude and then calculated velocity.
 5. Based on the velocity value, I set conditions:
 If velocity is positive → the system is ascending (green LED ON).
-If velocity is around zero → the system is at apogee (blue LED ON + buzzer ON).
+If velocity is around zero → the system is at apogee (yellow LED ON + buzzer ON).
 If velocity is negative → the system is descending (red LED ON).
 6. I also printed out values to the Serial monitor so I could check what was happening during the simulation.
 7. This way, the state of the system is always indicated clearly through LEDs and the buzzer at the peak.
