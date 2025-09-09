@@ -1,3 +1,14 @@
+FILE STRUCTURE:
+📂 JANUS_Induction
+      └── 📂 Round 3
+           ├── 📂 Problem 1
+           │    ├── arduino_code.ino
+           ├── 📂 Problem 2
+                ├── index.html
+                ├── index_with3d.html
+           ├── 📂 Problem 3
+                ├── kicad.lck
+
 # README – My Journey Through Problems 1, 2, and 3
 
 This file is more of a personal log than a strict technical manual. It’s about how I approached the three avionics-related problems, what I did, what worked, what didn’t, and what I’d probably improve if I had more time.
