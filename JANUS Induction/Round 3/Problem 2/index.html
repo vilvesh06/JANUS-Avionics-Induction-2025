@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Arduino Ground Control System</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+    #graph { width: 100%; height: 500px; }
+  </style>
+</head>
+<body>
+  <h2>Arduino Ground Control System</h2>
+  <button id="connect">Connect to Arduino</button>
+  <button id="simulate">Run Simulation</button>
+  <div id="graph"></div>
+
+  <script>
+    // ========== Function: Real Arduino Mode ==========
+    async function connectArduino() {
+      try {
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        const decoder = new TextDecoderStream();
+        port.readable.pipeTo(decoder.writable);
+        const reader = decoder.readable.getReader();
+
+        let timeData = [], sensor1 = [], sensor2 = [];
+        Plotly.newPlot("graph", [
+          { x: [], y: [], mode: "lines", name: "Latitude" },
+          { x: [], y: [], mode: "lines", name: "Longitude" }
+        ], { title: "Live Arduino GPS Data", xaxis: {title: "Time (s)"}, yaxis: {title: "Value"} });
+
+        let startTime = Date.now();
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) {
+            let lines = value.trim().split("\n");
+            lines.forEach(line => {
+              let parts = line.split(",");
+              if (parts[0].includes("GGA") && parts.length > 5) {
+                let latRaw = parts[2];
+                let latDir = parts[3];
+                let lonRaw = parts[4];
+                let lonDir = parts[5];
+
+                // Convert from NMEA (ddmm.mmmm) to decimal degrees
+                function nmeaToDecimal(coord, dir) {
+                  if (!coord) return NaN;
+                  let deg = parseInt(coord.slice(0, coord.length-7), 10);
+                  let min = parseFloat(coord.slice(coord.length-7));
+                  let decimal = deg + min/60.0;
+                  if (dir === "S" || dir === "W") decimal *= -1;
+                  return decimal;
+                }
+
+                let lat = nmeaToDecimal(latRaw, latDir);
+                let lon = nmeaToDecimal(lonRaw, lonDir);
+
+                let t = (Date.now() - startTime) / 1000;
+                timeData.push(t);
+                sensor1.push(lat);
+                sensor2.push(lon);
+
+                if (timeData.length > 50) {
+                  timeData.shift(); sensor1.shift(); sensor2.shift();
+                }
+
+                Plotly.update("graph", { x: [timeData, timeData], y: [sensor1, sensor2] });
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Error connecting to Arduino. Try again.");
+      }
+    }
+
+    // ========== Function: Simulation Mode ==========
+    function simulateData() {
+      let timeData = [], sensor1 = [], sensor2 = [];
+      Plotly.newPlot("graph", [
+        { x: [], y: [], mode: "lines", name: "Temperature (°C)", line: {color: "blue"} },
+        { x: [], y: [], mode: "lines", name: "Pressure (hPa)", line: {color: "red"} }
+      ], { title: "Simulated Live Data", xaxis: {title: "Time (s)"}, yaxis: {title: "Value"} });
+
+      let startTime = Date.now();
+      setInterval(() => {
+        let t = (Date.now() - startTime) / 1000;
+        let temp = 20 + Math.random() * 10;     // 20–30 °C
+        let pres = 1000 + Math.random() * 25;   // 1000–1025 hPa
+
+        timeData.push(t); sensor1.push(temp); sensor2.push(pres);
+
+        if (timeData.length > 50) {
+          timeData.shift(); sensor1.shift(); sensor2.shift();
+        }
+
+        Plotly.update("graph", { x: [timeData, timeData], y: [sensor1, sensor2] });
+      }, 500);
+    }
+
+    // ========== Button Listeners ==========
+    document.getElementById("connect").addEventListener("click", connectArduino);
+    document.getElementById("simulate").addEventListener("click", simulateData);
+  </script>
+</body>
+</html>

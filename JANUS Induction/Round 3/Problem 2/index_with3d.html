@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Arduino Ground Control System</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+    #graph { width: 100%; height: 500px; }
+  </style>
+</head>
+<body>
+  <h2>Arduino Ground Control System</h2>
+  <button id="connect">Connect to Arduino</button>
+  <button id="simulate2D">Run 2D Simulation</button>
+  <button id="simulate3D">Run 3D Simulation</button>
+  <div id="graph"></div>
+
+  <script>
+    // ========== Function: Arduino Mode ==========
+    async function connectArduino() {
+      try {
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        const decoder = new TextDecoderStream();
+        port.readable.pipeTo(decoder.writable);
+        const reader = decoder.readable.getReader();
+
+        let lat = [], lon = [], alt = [];
+        Plotly.newPlot("graph", [{
+          x: [], y: [], z: [], mode: "lines+markers", type: "scatter3d", name: "Flight Path"
+        }], { title: "Live GPS Data (Arduino)", scene: { xaxis:{title:"Longitude"}, yaxis:{title:"Latitude"}, zaxis:{title:"Altitude (m)"} } });
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) {
+            let lines = value.trim().split("\n");
+            lines.forEach(line => {
+              let parts = line.split(",");
+              if (parts.length === 3) {
+                lon.push(parseFloat(parts[1]));
+                lat.push(parseFloat(parts[0]));
+                alt.push(parseFloat(parts[2]));
+
+                if (lat.length > 100) { lat.shift(); lon.shift(); alt.shift(); }
+
+                Plotly.update("graph", { x: [lon], y: [lat], z: [alt] });
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Error connecting to Arduino. Try again.");
+      }
+    }
+
+    // ========== Function: 2D Simulation ==========
+    function simulate2D() {
+      let timeData = [], sensor1 = [], sensor2 = [];
+      Plotly.newPlot("graph", [
+        { x: [], y: [], mode: "lines", name: "Temperature (°C)", line: {color: "blue"} },
+        { x: [], y: [], mode: "lines", name: "Pressure (hPa)", line: {color: "red"} }
+      ], { title: "Simulated 2D Data", xaxis: {title: "Time (s)"}, yaxis: {title: "Value"} });
+
+      let startTime = Date.now();
+      setInterval(() => {
+        let t = (Date.now() - startTime) / 1000;
+        let temp = 20 + Math.random() * 10;
+        let pres = 1000 + Math.random() * 25;
+
+        timeData.push(t); sensor1.push(temp); sensor2.push(pres);
+
+        if (timeData.length > 50) { timeData.shift(); sensor1.shift(); sensor2.shift(); }
+
+        Plotly.update("graph", { x: [timeData, timeData], y: [sensor1, sensor2] });
+      }, 500);
+    }
+
+    // ========== Function: 3D Simulation ==========
+    function simulate3D() {
+      let lat = [], lon = [], alt = [];
+      Plotly.newPlot("graph", [{
+        x: [], y: [], z: [], mode: "lines+markers", type: "scatter3d", name: "Simulated Path"
+      }], { title: "Simulated 3D GPS Data", scene: { xaxis:{title:"Longitude"}, yaxis:{title:"Latitude"}, zaxis:{title:"Altitude (m)"} } });
+
+      let lon0 = 77.5, lat0 = 12.9, alt0 = 900;
+      setInterval(() => {
+        // Generate fake GPS path
+        lon0 += (Math.random()-0.5) * 0.001;
+        lat0 += (Math.random()-0.5) * 0.001;
+        alt0 += (Math.random()-0.5) * 10;
+
+        lon.push(lon0); lat.push(lat0); alt.push(alt0);
+
+        if (lat.length > 100) { lat.shift(); lon.shift(); alt.shift(); }
+
+        Plotly.update("graph", { x: [lon], y: [lat], z: [alt] });
+      }, 500);
+    }
+
+    // ========== Button Listeners ==========
+    document.getElementById("connect").addEventListener("click", connectArduino);
+    document.getElementById("simulate2D").addEventListener("click", simulate2D);
+    document.getElementById("simulate3D").addEventListener("click", simulate3D);
+  </script>
+</body>
+</html>
