@@ -20,6 +20,8 @@ At first, the goal was simple: just get some data from the Arduino and show it o
 * Add labels to the graph depending on what the sensors actually are.
 * Maybe save the incoming data to a file.
 
+**Improvements I did**
+* Change the existing code to plot on a 3d scale with the dimensions: altitude, latitude and longitude
 ---
 
 ## Problem 2 – GPS Data with NMEA Sentences
